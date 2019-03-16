@@ -7,7 +7,6 @@ PREDICTOR_PATH = "/home/bordia98/eyeblink/Code/shape_predictor_68_face_landmarks
 
 FULL_POINTS = list(range(0, 68))  
 FACE_POINTS = list(range(17, 68))  
-
 JAWLINE_POINTS = list(range(0, 17))  
 RIGHT_EYEBROW_POINTS = list(range(17, 22))  
 LEFT_EYEBROW_POINTS = list(range(22, 27))  
@@ -18,13 +17,18 @@ MOUTH_OUTLINE_POINTS = list(range(48, 61))
 MOUTH_INNER_POINTS = list(range(61, 68))  
 
 EYE_AR_THRESH = 0.25  
-EYE_AR_CONSEC_FRAMES = 3  
+EYE_AR_CONSEC_FRAMES = 5
 
 COUNTER_LEFT = 0  
 TOTAL_LEFT = 0  
 
 COUNTER_RIGHT = 0  
 TOTAL_RIGHT = 0
+
+COUNTER_BLINK = 0
+TOTAL_BLINK = 0
+
+flag_left,flag_right,flag_blink  = 0,0,0                
 
 def eye_aspect_ratio(eye):  
    A = dist.euclidean(eye[1], eye[5])  
@@ -65,32 +69,67 @@ while True:
             ear_left = eye_aspect_ratio(left_eye)  
             ear_right = eye_aspect_ratio(right_eye)  
 
-            cv2.putText(frame, "E.A.R. Left : {:.2f}".format(ear_left), (300, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)  
-            cv2.putText(frame, "E.A.R. Right: {:.2f}".format(ear_right), (300, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)  
+            print("****************************************")
+            print("Counter Blink : " , COUNTER_BLINK)
+            print("Counter LEFT : ", COUNTER_LEFT)
+            print("Counter Right : ", COUNTER_RIGHT)
+            print("****************************************")
+    
+            if COUNTER_BLINK >= 10:
+                flag_blink = 1
+            else:
+                if flag_blink == 1:
+                    TOTAL_BLINK += 1
+                    print("Blink Occured")
+                    COUNTER_BLINK = 0
+                    flag_blink = 0
 
-            if ear_left < EYE_AR_THRESH:  
-                COUNTER_LEFT += 1  
+            if ear_left < EYE_AR_THRESH:
+                if ear_right < EYE_AR_THRESH:
+                    COUNTER_BLINK += 1
+                else:
+                    COUNTER_BLINK = 0
+                    COUNTER_LEFT += 1  
             else:  
                 if COUNTER_LEFT >= EYE_AR_CONSEC_FRAMES:  
-                    TOTAL_LEFT += 1  
-                    print("Left eye winked")  
-                COUNTER_LEFT = 0  
+                    flag_left = 1
+                else:
+                    if flag_left ==1:
+                        TOTAL_LEFT += 1  
+                        print("Left eye winked")  
+                    COUNTER_LEFT = 0
+                    flag_left = 0  
 
-            if ear_right < EYE_AR_THRESH:  
-                COUNTER_RIGHT += 1  
+            if ear_right < EYE_AR_THRESH:
+                if ear_left < EYE_AR_THRESH:  
+                    pass
+                else:
+                    COUNTER_BLINK = 0
+                    COUNTER_RIGHT += 1  
             else:  
                 if COUNTER_RIGHT >= EYE_AR_CONSEC_FRAMES:  
-                    TOTAL_RIGHT += 1  
-                    print("Right eye winked")  
-                COUNTER_RIGHT = 0  
+                    flag_right = 1
+                else:
+                    if flag_right == 1:
+                        TOTAL_RIGHT += 1  
+                        print("Right eye winked")  
+                    COUNTER_RIGHT = 0  
+                    flag_right = 0
+
+            if ear_left >= EYE_AR_THRESH :
+                COUNTER_LEFT = 0
+                COUNTER_BLINK = 0
+
+            if ear_right >= EYE_AR_THRESH:
+                COUNTER_RIGHT = 0
+                COUNTER_BLINK = 0
 
         cv2.putText(frame, "Wink Left : {}".format(TOTAL_LEFT), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)  
         cv2.putText(frame, "Wink Right: {}".format(TOTAL_RIGHT), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)  
-
+        cv2.putText(frame, "Blink Occured: {}".format(TOTAL_BLINK), (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)  
         cv2.imshow("Faces found", frame)  
 
     ch = 0xFF & cv2.waitKey(1)  
-    cv2.waitKey(10)
     if ch == ord('q'):  
         break  
 
