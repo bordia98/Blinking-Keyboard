@@ -3,6 +3,7 @@ import cv2
 import dlib  
 from scipy.spatial import distance as dist
 
+
 PREDICTOR_PATH = "/home/bordia98/eyeblink/Code/shape_predictor_68_face_landmarks.dat"
 
 FULL_POINTS = list(range(0, 68))  
@@ -132,5 +133,4 @@ while True:
     ch = 0xFF & cv2.waitKey(1)  
     if ch == ord('q'):  
         break  
-
 cv2.destroyAllWindows() 
