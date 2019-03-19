@@ -20,14 +20,14 @@ MOUTH_INNER_POINTS = list(range(61, 68))
 EYE_AR_THRESH = 0.25  
 EYE_AR_CONSEC_FRAMES = 5
 
-COUNTER_LEFT = 0  
-TOTAL_LEFT = 0  
+counter_left = 0  
+total_left = 0  
 
-COUNTER_RIGHT = 0  
-TOTAL_RIGHT = 0
+counter_right = 0  
+total_right = 0
 
-COUNTER_BLINK = 0
-TOTAL_BLINK = 0
+counter_blink = 0
+total_blink = 0
 
 flag_left,flag_right,flag_blink  = 0,0,0                
 
@@ -43,14 +43,13 @@ detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(PREDICTOR_PATH)  
 
 video_capture = cv2.VideoCapture(-1)
-
+image = "base"
+text = ""
 while True:  
     ret, frame = video_capture.read()  
     if ret:  
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  
-
         rects = detector(gray, 0)  
-
         for rect in rects:  
             x = rect.left()  
             y = rect.top()  
@@ -71,65 +70,89 @@ while True:
             ear_right = eye_aspect_ratio(right_eye)  
 
             print("****************************************")
-            print("Counter Blink : " , COUNTER_BLINK)
-            print("Counter LEFT : ", COUNTER_LEFT)
-            print("Counter Right : ", COUNTER_RIGHT)
+            print("Counter Blink : " , counter_blink)
+            print("Counter LEFT : ", counter_left)
+            print("Counter Right : ", counter_right)
             print("****************************************")
     
-            if COUNTER_BLINK >= 10:
+            if counter_blink >= 10:
                 flag_blink = 1
             else:
                 if flag_blink == 1:
-                    TOTAL_BLINK += 1
+                    total_blink += 1
                     print("Blink Occured")
-                    COUNTER_BLINK = 0
+                    counter_blink = 0
                     flag_blink = 0
 
             if ear_left < EYE_AR_THRESH:
                 if ear_right < EYE_AR_THRESH:
-                    COUNTER_BLINK += 1
+                    counter_blink += 1
                 else:
-                    COUNTER_BLINK = 0
-                    COUNTER_LEFT += 1  
+                    counter_blink = 0
+                    counter_left += 1  
             else:  
-                if COUNTER_LEFT >= EYE_AR_CONSEC_FRAMES:  
+                if counter_left >= EYE_AR_CONSEC_FRAMES:  
                     flag_left = 1
                 else:
                     if flag_left ==1:
-                        TOTAL_LEFT += 1  
+                        total_left += 1  
                         print("Left eye winked")  
-                    COUNTER_LEFT = 0
+                    counter_left = 0
                     flag_left = 0  
 
             if ear_right < EYE_AR_THRESH:
                 if ear_left < EYE_AR_THRESH:  
                     pass
                 else:
-                    COUNTER_BLINK = 0
-                    COUNTER_RIGHT += 1  
+                    counter_blink = 0
+                    counter_right += 1  
             else:  
-                if COUNTER_RIGHT >= EYE_AR_CONSEC_FRAMES:  
+                if counter_right >= EYE_AR_CONSEC_FRAMES:  
                     flag_right = 1
                 else:
                     if flag_right == 1:
-                        TOTAL_RIGHT += 1  
+                        total_right += 1  
                         print("Right eye winked")  
-                    COUNTER_RIGHT = 0  
+                    counter_right = 0  
                     flag_right = 0
 
             if ear_left >= EYE_AR_THRESH :
-                COUNTER_LEFT = 0
-                COUNTER_BLINK = 0
+                counter_left = 0
+                counter_blink = 0
 
             if ear_right >= EYE_AR_THRESH:
-                COUNTER_RIGHT = 0
-                COUNTER_BLINK = 0
+                counter_right = 0
+                counter_blink = 0
 
-        cv2.putText(frame, "Wink Left : {}".format(TOTAL_LEFT), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)  
-        cv2.putText(frame, "Wink Right: {}".format(TOTAL_RIGHT), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)  
-        cv2.putText(frame, "Blink Occured: {}".format(TOTAL_BLINK), (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)  
+
+        cv2.putText(frame, "Wink Left : {}".format(total_left), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)  
+        cv2.putText(frame, "Wink Right: {}".format(total_right), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)  
+        cv2.putText(frame, "Blink Occured: {}".format(total_blink), (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)  
+        if total_left ==  1:
+            if image == "base":
+                image = ""
+            image+='0'
+            total_left = 0
+        
+        if total_right == 1:
+            if image =="base":
+                image = ""
+            image+='1'
+            total_right = 0
+        
+        if total_blink == 1:
+            print("image is   "+image+".jpg")
+            # do the required action
+            image = "base"
+            total_blink = 0
+            total_left = 0
+            total_right = 0
+        cv2.namedWindow("KeyBoard", cv2.WINDOW_NORMAL)      
+        ia = cv2.imread(image+".jpg")
+        ims = cv2.resize(ia, (700, 400))                    # Resize image
+        cv2.imshow("KeyBoard " , ims)
         cv2.imshow("Faces found", frame)  
-
+        
     ch = 0xFF & cv2.waitKey(1)  
     if ch == ord('q'):  
         break  
