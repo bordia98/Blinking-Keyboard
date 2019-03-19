@@ -2,6 +2,7 @@ import numpy as np
 import cv2  
 import dlib  
 from scipy.spatial import distance as dist
+import os
 
 
 PREDICTOR_PATH = "/home/bordia98/eyeblink/Code/shape_predictor_68_face_landmarks.dat"
@@ -77,6 +78,9 @@ while True:
     
             if counter_blink >= 10:
                 flag_blink = 1
+                duration = .1  # seconds
+                freq = 440  # Hz
+                os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
             else:
                 if flag_blink == 1:
                     total_blink += 1
@@ -149,10 +153,14 @@ while True:
             total_right = 0
         cv2.namedWindow("KeyBoard", cv2.WINDOW_NORMAL)      
         ia = cv2.imread(image+".jpg")
-        ims = cv2.resize(ia, (700, 400))                    # Resize image
-        cv2.imshow("KeyBoard " , ims)
-        cv2.imshow("Faces found", frame)  
-        
+        # ims = cv2.resize(ia, (700, 400))                    # Resize image
+        cv2.imshow("KeyBoard" , ia)
+        cv2.namedWindow("Faces", cv2.WINDOW_NORMAL)      
+        cv2.imshow("Faces", frame)  
+        cv2.namedWindow("Typed_Text", cv2.WINDOW_NORMAL)      
+        draw = cv2.imread("draw.jpg")
+        # dr = cv2.resize(draw, (1200, 300))                    # Resize image
+        cv2.imshow("Typed_Text" , draw)
     ch = 0xFF & cv2.waitKey(1)  
     if ch == ord('q'):  
         break  
