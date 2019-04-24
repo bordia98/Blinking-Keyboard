@@ -5,4 +5,23 @@ Designing a keyboard for differently abled people. Targeting to cover English Al
 
 Higly Experimental 
 
-**In Progress
+TO RUN:
+
+- Create a python3 virtual environment
+
+- Install dlib
+
+- Install OpenCv
+
+- Install numpy
+
+- Install scipy
+
+- Install pyttsx3
+
+- Connect the USB camera if you have for better result
+
+- Run the defaulf_cam.sh script in your ubuntu system
+
+- Now run the program using:
+  python3 wink_detection.py
