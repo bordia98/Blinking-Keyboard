@@ -25,3 +25,13 @@ TO RUN:
 
 - Now run the program using:
   python3 wink_detection.py
+  
+  
+  ### Project Members:
+
+[Bharat Sharma](https://github.com/GENU05)
+
+[Bhavya Bordia](https://github.com/bordia98)
+
+[Abhishek Kamal](https://github.com/abhishek371)
+
